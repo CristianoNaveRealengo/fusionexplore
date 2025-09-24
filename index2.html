@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Merge Explorer AR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            overflow: hidden;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            height: 100vh;
+        }
+        
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s;
+        }
+        
+        .loader {
+            width: 80px;
+            height: 80px;
+            border: 8px solid rgba(255, 255, 255, 0.1);
+            border-top: 8px solid #4f46e5;
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .arjs-loader {
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        .arjs-loader div {
+            text-align: center;
+            font-size: 1.25rem;
+            color: white;
+        }
+        
+        .arjs-loader .spinner {
+            width: 80px;
+            height: 80px;
+            border: 3px solid transparent;
+            border-top-color: #4f46e5;
+            border-bottom-color: #4f46e5;
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        #ui-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 10;
+            padding: 20px;
+            pointer-events: none;
+        }
+        
+        .control-panel {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 15px;
+            max-width: 500px;
+            margin: 0 auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            pointer-events: auto;
+        }
+        
+        .object-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .object-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .object-item:hover, .object-item.active {
+            background: rgba(79, 70, 229, 0.7);
+            transform: translateY(-5px);
+        }
+        
+        .object-item i {
+            font-size: 24px;
+            margin-bottom: 5px;
+            color: white;
+        }
+        
+        .object-item span {
+            font-size: 12px;
+            color: white;
+            display: block;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            flex: 1;
+            background: rgba(79, 70, 229, 0.8);
+            border: none;
+            border-radius: 12px;
+            padding: 12px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .action-btn:hover {
+            background: rgba(99, 102, 241, 0.9);
+            transform: translateY(-3px);
+        }
+        
+        .action-btn i {
+            font-size: 18px;
+        }
+        
+        #ar-scene {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .instruction {
+            position: fixed;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            font-weight: 500;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            z-index: 5;
+            padding: 10px;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(5px);
+        }
+        
+        .title-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+            z-index: 100;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .title-screen h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        
+        .title-screen p {
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.9);
+            max-width: 600px;
+            margin-bottom: 40px;
+        }
+        
+        .start-btn {
+            background: linear-gradient(to right, #4f46e5, #7c3aed);
+            border: none;
+            border-radius: 50px;
+            padding: 16px 50px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .start-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+        
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 30px;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Title Screen -->
+    <div class="title-screen" id="titleScreen">
+        <div class="logo">
+            <i class="fas fa-cube"></i>
+        </div>
+        <h1>Merge Explorer AR</h1>
+        <p>Experience augmented reality like never before. Place 3D objects in your environment and interact with them in real-time.</p>
+        <button class="start-btn" id="startBtn">
+            <i class="fas fa-play mr-2"></i> Start AR Experience
+        </button>
+    </div>
+    
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="hidden">
+        <div class="loader"></div>
+        <h2 class="text-white text-xl font-semibold">Loading AR Experience</h2>
+        <p class="text-gray-300 mt-2">Please wait while we initialize the augmented reality environment</p>
+    </div>
+    
+    <!-- AR.js Loader -->
+    <div class="arjs-loader hidden">
+        <div class="spinner"></div>
+        <div>Move your device around to detect surfaces</div>
+    </div>
+    
+    <!-- Instruction Text -->
+    <div class="instruction hidden" id="instruction">
+        <i class="fas fa-hand-pointer mr-2"></i> Tap on a surface to place the object
+    </div>
+    
+    <!-- UI Container -->
+    <div id="uiContainer" class="hidden">
+        <div class="control-panel">
+            <div class="object-grid">
+                <div class="object-item active" data-model="dinosaur">
+                    <i class="fas fa-dragon"></i>
+                    <span>Dinosaur</span>
+                </div>
+                <div class="object-item" data-model="rocket">
+                    <i class="fas fa-rocket"></i>
+                    <span>Rocket</span>
+                </div>
+                <div class="object-item" data-model="globe">
+                    <i class="fas fa-globe-americas"></i>
+                    <span>Globe</span>
+                </div>
+                <div class="object-item" data-model="atom">
+                    <i class="fas fa-atom"></i>
+                    <span>Atom</span>
+                </div>
+                <div class="object-item" data-model="world">
+                    <i class="fas fa-globe"></i>
+                    <span>World</span>
+                </div>
+                <div class="object-item" data-model="tree">
+                    <i class="fas fa-tree"></i>
+                    <span>Tree</span>
+                </div>
+                <div class="object-item" data-model="car">
+                    <i class="fas fa-car"></i>
+                    <span>Car</span>
+                </div>
+                <div class="object-item" data-model="robot">
+                    <i class="fas fa-robot"></i>
+                    <span>Robot</span>
+                </div>
+                <div class="object-item" data-model="building">
+                    <i class="fas fa-building"></i>
+                    <span>Building</span>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button class="action-btn" id="rotateBtn">
+                    <i class="fas fa-sync-alt"></i> Rotate
+                </button>
+                <button class="action-btn" id="scaleBtn">
+                    <i class="fas fa-expand-alt"></i> Scale
+                </button>
+                <button class="action-btn" id="removeBtn">
+                    <i class="fas fa-trash-alt"></i> Remove
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- AR Scene -->
+    <div id="ar-scene"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Elements
+            const titleScreen = document.getElementById('titleScreen');
+            const loadingScreen = document.getElementById('loadingScreen');
+            const arLoader = document.querySelector('.arjs-loader');
+            const instruction = document.getElementById('instruction');
+            const uiContainer = document.getElementById('uiContainer');
+            const startBtn = document.getElementById('startBtn');
+            const objectItems = document.querySelectorAll('.object-item');
+            const rotateBtn = document.getElementById('rotateBtn');
+            const scaleBtn = document.getElementById('scaleBtn');
+            const removeBtn = document.getElementById('removeBtn');
+            
+            // State variables
+            let currentModel = 'dinosaur';
+            let placedEntity = null;
+            let isRotating = false;
+            let isScaling = false;
+            
+            // Start AR experience
+            startBtn.addEventListener('click', () => {
+                titleScreen.classList.add('hidden');
+                loadingScreen.classList.remove('hidden');
+                
+                // Simulate loading time
+                setTimeout(initAR, 2000);
+            });
+            
+            // Initialize AR scene
+            function initAR() {
+                loadingScreen.classList.add('hidden');
+                arLoader.classList.remove('hidden');
+                
+                // Create A-Frame scene
+                const scene = document.createElement('a-scene');
+                scene.setAttribute('embedded', '');
+                scene.setAttribute('arjs', 'sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3;');
+                scene.setAttribute('renderer', 'logarithmicDepthBuffer: true;');
+                scene.setAttribute('vr-mode-ui', 'enabled: false');
+                scene.setAttribute('device-orientation-permission-ui', 'enabled: false');
+                
+                // Add camera
+                const camera = document.createElement('a-camera');
+                camera.setAttribute('gps-camera', 'simulateLatitude: 0; simulateLongitude: 0;');
+                camera.setAttribute('rotation-reader', '');
+                
+                // Add cursor for interaction
+                const cursor = document.createElement('a-cursor');
+                cursor.setAttribute('raycaster', 'objects: .clickable');
+                cursor.setAttribute('cursor', 'rayOrigin: mouse');
+                
+                camera.appendChild(cursor);
+                scene.appendChild(camera);
+                
+                // Add reticle for placement
+                const reticle = document.createElement('a-ring');
+                reticle.setAttribute('id', 'reticle');
+                reticle.setAttribute('radius-inner', '0.02');
+                reticle.setAttribute('radius-outer', '0.03');
+                reticle.setAttribute('color', '#4f46e5');
+                reticle.setAttribute('material', 'shader: flat;');
+                reticle.setAttribute('position', '0 0 -1');
+                reticle.setAttribute('visible', 'false');
+                reticle.setAttribute('cursor-listener', '');
+                camera.appendChild(reticle);
+                
+                // Add light
+                const light = document.createElement('a-light');
+                light.setAttribute('type', 'ambient');
+                light.setAttribute('color', '#fff');
+                light.setAttribute('intensity', '0.6');
+                scene.appendChild(light);
+                
+                const directionalLight = document.createElement('a-light');
+                directionalLight.setAttribute('type', 'directional');
+                directionalLight.setAttribute('color', '#fff');
+                directionalLight.setAttribute('intensity', '0.8');
+                directionalLight.setAttribute('position', '1 1 1');
+                scene.appendChild(directionalLight);
+                
+                // Add scene to DOM
+                document.getElementById('ar-scene').appendChild(scene);
+                
+                // When AR is ready
+                scene.addEventListener('arjs-system-initialized', () => {
+                    arLoader.classList.add('hidden');
+                    instruction.classList.remove('hidden');
+                    uiContainer.classList.remove('hidden');
+                });
+                
+                // Handle model selection
+                objectItems.forEach(item => {
+                    item.addEventListener('click', () => {
+                        objectItems.forEach(i => i.classList.remove('active'));
+                        item.classList.add('active');
+                        currentModel = item.dataset.model;
+                    });
+                });
+                
+                // Handle surface tap
+                scene.addEventListener('click', (evt) => {
+                    if (placedEntity) return;
+                    
+                    // Create entity at reticle position
+                    const entity = document.createElement('a-entity');
+                    entity.classList.add('clickable');
+                    
+                    // Set position and rotation
+                    const reticlePos = reticle.object3D.position.clone();
+                    camera.object3D.localToWorld(reticlePos);
+                    entity.setAttribute('position', reticlePos);
+                    entity.setAttribute('rotation', camera.getAttribute('rotation'));
+                    
+                    // Add model based on selection
+                    switch(currentModel) {
+                        case 'dinosaur':
+                            entity.setAttribute('gltf-model', 'https://cdn.aframe.io/test-models/models/glTF-2.0/Trex/trex.gltf');
+                            entity.setAttribute('scale', '0.2 0.2 0.2');
+                            break;
+                        case 'rocket':
+                            entity.setAttribute('geometry', 'primitive: cone; height: 0.5; radiusBottom: 0.1; radiusTop: 0.01');
+                            entity.setAttribute('material', 'color: #4f46e5; metalness: 0.8; roughness: 0.2');
+                            entity.setAttribute('scale', '0.5 0.5 0.5');
+                            break;
+                        case 'globe':
+                            entity.setAttribute('geometry', 'primitive: sphere; radius: 0.2');
+                            entity.setAttribute('material', 'src: https://cdn.aframe.io/360-image-gallery-boilerplate/img/sechelt.jpg; color: #FFF');
+                            break;
+                        case 'atom':
+                            entity.setAttribute('geometry', 'primitive: torus; radius: 0.2; radiusTubular: 0.02');
+                            entity.setAttribute('material', 'color: #10b981; metalness: 0.8');
+                            entity.setAttribute('rotation', '90 0 0');
+                            
+                            // Add orbiting electrons
+                            for (let i = 0; i < 3; i++) {
+                                const electron = document.createElement('a-entity');
+                                electron.setAttribute('geometry', 'primitive: sphere; radius: 0.03');
+                                electron.setAttribute('material', 'color: #ef4444');
+                                electron.setAttribute('position', `0.3 0 0`);
+                                electron.setAttribute('orbit', `center: 0 0 0; radius: 0.3; speed: ${0.5 + i*0.2}; axis: 0 1 0`);
+                                entity.appendChild(electron);
+                            }
+                            break;
+                        case 'world':
+                            entity.setAttribute('geometry', 'primitive: box; width: 0.5; height: 0.5; depth: 0.5');
+                            entity.setAttribute('material', 'src: https://cdn.aframe.io/360-image-gallery-boilerplate/img/sechelt.jpg; color: #FFF');
+                            entity.setAttribute('scale', '1 1 1');
+                            break;
+                        case 'tree':
+                            entity.setAttribute('gltf-model', 'https://cdn.aframe.io/test-models/models/glTF-2.0/Tree/Tree.gltf');
+                            entity.setAttribute('scale', '0.5 0.5 0.5');
+                            break;
+                        case 'car':
+                            entity.setAttribute('gltf-model', 'https://cdn.aframe.io/test-models/models/glTF-2.0/Car/Car.gltf');
+                            entity.setAttribute('scale', '0.5 0.5 0.5');
+                            break;
+                        case 'robot':
+                            entity.setAttribute('gltf-model', 'https://cdn.aframe.io/test-models/models/glTF-2.0/RobotExpressive/RobotExpressive.gltf');
+                            entity.setAttribute('scale', '0.2 0.2 0.2');
+                            break;
+                        case 'building':
+                            entity.setAttribute('geometry', 'primitive: box; width: 0.5; height: 0.8; depth: 0.5');
+                            entity.setAttribute('material', 'color: #888; metalness: 0.3; roughness: 0.7');
+                            entity.setAttribute('scale', '1 1 1');
+                            break;
+                    }
+                    
+                    scene.appendChild(entity);
+                    placedEntity = entity;
+                    reticle.setAttribute('visible', 'false');
+                });
+                
+                // Handle rotation
+                rotateBtn.addEventListener('click', () => {
+                    if (!placedEntity) return;
+                    isRotating = !isRotating;
+                    rotateBtn.style.background = isRotating ? 
+                        'rgba(239, 68, 68, 0.8)' : 
+                        'rgba(79, 70, 229, 0.8)';
+                    
+                    if (isRotating) {
+                        placedEntity.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear');
+                    } else {
+                        placedEntity.removeAttribute('animation');
+                    }
+                });
+                
+                // Handle scaling
+                scaleBtn.addEventListener('click', () => {
+                    if (!placedEntity) return;
+                    isScaling = !isScaling;
+                    scaleBtn.style.background = isScaling ? 
+                        'rgba(239, 68, 68, 0.8)' : 
+                        'rgba(79, 70, 229, 0.8)';
+                    
+                    if (isScaling) {
+                        placedEntity.setAttribute('animation__scale', 'property: scale; dir: alternate; dur: 1000; loop: true; to: 1.2 1.2 1.2; easing: easeInOutQuad');
+                    } else {
+                        placedEntity.removeAttribute('animation__scale');
+                        placedEntity.setAttribute('scale', '1 1 1');
+                    }
+                });
+                
+                // Handle removal
+                removeBtn.addEventListener('click', () => {
+                    if (placedEntity) {
+                        placedEntity.parentNode.removeChild(placedEntity);
+                        placedEntity = null;
+                        reticle.setAttribute('visible', 'true');
+                        isRotating = false;
+                        isScaling = false;
+                        rotateBtn.style.background = 'rgba(79, 70, 229, 0.8)';
+                        scaleBtn.style.background = 'rgba(79, 70, 229, 0.8)';
+                    }
+                });
+            }
+            
+            // Custom component for orbiting animation
+            AFRAME.registerComponent('orbit', {
+                schema: {
+                    center: {type: 'vec3', default: {x: 0, y: 0, z: 0}},
+                    radius: {type: 'number', default: 1},
+                    speed: {type: 'number', default: 1},
+                    axis: {type: 'vec3', default: {x: 0, y: 1, z: 0}}
+                },
+                
+                init: function() {
+                    this.angle = 0;
+                },
+                
+                tick: function(time, timeDelta) {
+                    this.angle += this.data.speed * (timeDelta / 1000);
+                    
+                    const center = this.data.center;
+                    const radius = this.data.radius;
+                    const axis = this.data.axis;
+                    
+                    // Calculate position on orbit
+                    const x = center.x + radius * Math.cos(this.angle);
+                    const z = center.z + radius * Math.sin(this.angle);
+                    
+                    this.el.setAttribute('position', {
+                        x: axis.x === 1 ? center.x : x,
+                        y: axis.y === 1 ? center.y : center.y + (axis.y === 1 ? 0 : Math.sin(this.angle) * radius),
+                        z: axis.z === 1 ? center.z : z
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
