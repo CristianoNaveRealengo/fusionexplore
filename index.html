@@ -5,54 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Merge Explore - Experiência A-Frame</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://unpkg.com/aframe-environment-component@1.3.2/dist/aframe-environment-component.min.js"></script>
-	
-
-	
-    <style>
-        /* Custom CSS for transitions and animations */
-        .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .panel-transition {
-            transition: all 0.3s ease;
-        }
-        
-        .vr-button {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        
-        .vr-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        
-        /* Custom scrollbar */
-        .custom-scroll::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .custom-scroll::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-        }
-        
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-        }
-        
-        .custom-scroll::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.5);
-        }
-    </style>
 </head>
 <body class="bg-gray-900 text-white overflow-hidden">
     <!-- Main Container -->
@@ -61,14 +13,14 @@
         <header class="bg-black bg-opacity-80 backdrop-blur-sm p-4 flex justify-between items-center z-50 border-b border-gray-800">
             <div class="flex items-center space-x-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 002 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
                 </svg>
                 <h1 class="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">Merge Explore</h1>
             </div>
             <div class="flex space-x-4">
                 <button id="vr-toggle" class="vr-button bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-full flex items-center space-x-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 002 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
                     </svg>
                     <span>Entrar em VR</span>
                 </button>
@@ -157,38 +109,75 @@
             
             <!-- A-Frame Scene -->
             <div class="flex-1 relative">
-                <a-scene id="aframe-scene" vr-mode-ui="enabled: true" embedded>
-				
-                    <!-- Default environment -->
+                <a-scene 
+                    id="aframe-scene" 
+                    vr-mode-ui="enabled: true" 
+                    embedded
+                    webxr-setup
+                    background="color: #ECECEC">
+                    
+                    <!-- Assets -->
+                    <a-assets>
+                        <a-asset-item id="logo-obj" src="./assets/logo.obj"></a-asset-item>
+                        <a-asset-item id="logo-mtl" src="./assets/obj.mtl"></a-asset-item>
+                    </a-assets>
+                    
+                    <!-- Environment -->
                     <a-entity environment="preset: forest; dressingAmount: 500"></a-entity>
                     
-					<!-- Jogador -->
-					<a-entity id="rig" movement-controls="speed: 0.1; fly: false" position="0 1.6 0">
-					
-					
-                    <!-- Camera -->
+                    <!-- Player Rig com controles otimizados para Meta Quest 3 -->
                     <a-entity 
-						  id="camera" 
-						  camera 
-						  look-controls 
-						  wasd-controls 
-						  position="0 0 0">
-						  <a-entity cursor="fuse: true; fuseTimeout: 500"
-									position="0 0 -1"
-									geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
-									material="color: #4FC3F7; shader: flat">
-						  </a-entity>					
+                        id="rig" 
+                        quest-controls="speed: 0.1; fly: false"
+                        position="0 1.6 0">
+                        
+                        <!-- Camera principal -->
+                        <a-entity 
+                            id="camera" 
+                            camera 
+                            look-controls="pointerLockEnabled: true"
+                            wasd-controls="acceleration: 20"
+                            position="0 0 0">
+                            
+                            <!-- Cursor para interação -->
+                            <a-entity 
+                                cursor="fuse: true; fuseTimeout: 1500"
+                                position="0 0 -1"
+                                geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+                                material="color: #4FC3F7; shader: flat">
+                            </a-entity>
+                        </a-entity>
+                        
+                        <!-- Controles de mão esquerda para Quest 3 -->
+                        <a-entity 
+                            id="leftController"
+                            oculus-touch-controls="hand: left"
+                            hand-tracking-controls="hand: left"
+                            quest-teleport="cameraRig: #rig; teleportOrigin: #camera; button: trigger"
+                            visible="true">
+                        </a-entity>
+                        
+                        <!-- Controles de mão direita para Quest 3 -->
+                        <a-entity 
+                            id="rightController"
+                            oculus-touch-controls="hand: right"
+                            hand-tracking-controls="hand: right"
+                            quest-teleport="cameraRig: #rig; teleportOrigin: #camera; button: trigger"
+                            visible="true">
+                        </a-entity>
                     </a-entity>
-                    <a-entity obj-model="obj: logo.obj"
-							  position="0 6 -11 " 
-							  scale="0.3 0.3 0.3">
-					</a-entity>
-					<a-entity camera look-controls wasd-controls-enabled="false"></a-entity>
-						</a-entity>
-                      
                     
-                    <!-- Sky -->
-                    <a-sky color="#ECECEC"></a-sky>
+                    <!-- Objeto 3D -->
+                    <a-entity 
+                        obj-model="obj: #logo-obj; mtl: #logo-mtl"
+                        position="0 6 -11" 
+                        scale="0.3 0.3 0.3"
+                        animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
+                    </a-entity>
+                    
+                    <!-- Iluminação otimizada -->
+                    <a-light type="ambient" color="#404040" intensity="0.4"></a-light>
+                    <a-light type="directional" position="1 1 1" color="#ffffff" intensity="0.6"></a-light>
                 </a-scene>
                 
                 <!-- Scene Controls -->
@@ -240,8 +229,13 @@
                 
                 <div class="space-y-4">
                     <div>
-                        <h3 class="text-lg font-semibold text-purple-400">Navegação</h3>
-                        <p class="text-gray-300 mt-1">Use as teclas WASD para se mover pela cena. Mantenha o botão direito do mouse pressionado e mova-o para olhar ao redor. Use a roda do mouse para aproximar/afastar.</p>
+                        <h3 class="text-lg font-semibold text-purple-400">Navegação no Meta Quest 3</h3>
+                        <p class="text-gray-300 mt-1">Use os controles do Quest 3 para se mover. Aponte com o controle e pressione o gatilho para teletransporte. Use o joystick para movimento suave.</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-lg font-semibold text-purple-400">Hand Tracking</h3>
+                        <p class="text-gray-300 mt-1">O Quest 3 suporta rastreamento de mãos. Remova os controles e use suas mãos para interagir diretamente com os objetos.</p>
                     </div>
                     
                     <div>
@@ -256,7 +250,7 @@
                     
                     <div>
                         <h3 class="text-lg font-semibold text-purple-400">Modo VR</h3>
-                        <p class="text-gray-300 mt-1">Clique no botão "Entrar em VR" para experimentar a cena em realidade virtual. Você precisará de um headset VR compatível para este recurso.</p>
+                        <p class="text-gray-300 mt-1">Clique no botão "Entrar em VR" para experimentar a cena em realidade virtual. Otimizado especificamente para Meta Quest 3.</p>
                     </div>
                     
                     <div>
@@ -274,96 +268,6 @@
         </div>
     </div>
     
-    <script>
-        // Toggle side panel
-        const togglePanelBtn = document.getElementById('toggle-panel');
-        const sidePanel = document.getElementById('side-panel');
-        
-        togglePanelBtn.addEventListener('click', () => {
-            sidePanel.classList.toggle('hidden');
-            sidePanel.classList.toggle('w-80');
-            sidePanel.classList.toggle('w-0');
-        });
-        
-        // VR toggle
-        const vrToggleBtn = document.getElementById('vr-toggle');
-        vrToggleBtn.addEventListener('click', () => {
-            const scene = document.querySelector('a-scene');
-            if (scene.hasAttribute('vr-mode-ui')) {
-                scene.setAttribute('vr-mode-ui', 'enabled: true');
-            }
-            
-            // Enter VR
-            if (scene.hasLoaded) {
-                scene.enterVR();
-            }
-        });
-        
-        // Help modal
-        const helpBtn = document.getElementById('help-btn');
-        const helpModal = document.getElementById('help-modal');
-        const closeHelp = document.getElementById('close-help');
-        const closeHelpBtn = document.getElementById('close-help-btn');
-        
-        helpBtn.addEventListener('click', () => {
-            helpModal.classList.remove('hidden');
-        });
-        
-        closeHelp.addEventListener('click', () => {
-            helpModal.classList.add('hidden');
-        });
-        
-        closeHelpBtn.addEventListener('click', () => {
-            helpModal.classList.add('hidden');
-        });
-        
-        // Scene selection
-        const sceneCards = document.querySelectorAll('.scene-card');
-        sceneCards.forEach(card => {
-            card.addEventListener('click', () => {
-                // Remove active class from all cards
-                sceneCards.forEach(c => c.classList.remove('border-purple-500', 'ring-2', 'ring-purple-500'));
-                
-                // Add active class to clicked card
-                card.classList.add('border-purple-500', 'ring-2', 'ring-purple-500');
-                
-                // Here you would typically load the selected scene into A-Frame
-                // For this example, we'll just change the environment preset
-                const scene = document.querySelector('a-scene');
-                const env = document.querySelector('[environment]');
-                
-                // Get a random environment preset
-                const presets = ['default', 'contact', 'egypt', 'checkerboard', 'forest', 'goaland', 'yavapai', 'goldmine', 'threetowers', 'poison', 'arches', 'tron', 'japan', 'dream', 'volcano', 'starry', 'osiris'];
-                const randomPreset = presets[Math.floor(Math.random() * presets.length)];
-                
-                env.setAttribute('environment', 'preset', randomPreset);
-                
-                // Show a notification
-                const notification = document.createElement('div');
-                notification.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-md shadow-lg fade-in';
-                notification.textContent = `Ambiente ${randomPreset} carregado`;
-                document.body.appendChild(notification);
-                
-                // Remove after 3 seconds
-                setTimeout(() => {
-                    notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
-                    setTimeout(() => notification.remove(), 300);
-                }, 3000);
-            });
-        });
-        
-        // Make the first scene card active by default
-        if (sceneCards.length > 0) {
-            sceneCards[0].classList.add('border-purple-500', 'ring-2', 'ring-purple-500');
-        }
-        
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            const scene = document.querySelector('a-scene');
-            if (scene) {
-                scene.resize();
-            }
-        });
-    </script>
+    <script type="module" src="/src/main.js"></script>
 </body>
 </html>
