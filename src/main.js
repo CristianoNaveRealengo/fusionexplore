@@ -120,21 +120,204 @@ AFRAME.registerComponent('quest-teleport', {
 // Registrar componentes customizados para Meta Quest 3
 AFRAME.registerComponent('quest-controls', {
   schema: {
-    speed: { type: 'number', default: 0.1 },
-    fly: { type: 'boolean', default: false }
+    speed: { type: 'number', default: 2.0 },
+    fly: { type: 'boolean', default: false },
+    rotationSpeed: { type: 'number', default: 1.0 }
   },
   
   init: function () {
     const el = this.el;
     const data = this.data;
     
-    // Configurar movement-controls do aframe-extras
+    this.velocity = new THREE.Vector3();
+    this.direction = new THREE.Vector3();
+    this.rotation = new THREE.Euler();
+    
+    // Configurar movement-controls como fallback para desktop
     el.setAttribute('movement-controls', {
       speed: data.speed,
       fly: data.fly,
       constrainToNavMesh: false,
       camera: '#camera'
     });
+    
+    // Adicionar controles nativos para VR
+    this.setupVRControls();
+  },
+  
+  setupVRControls: function () {
+    const el = this.el;
+    const camera = el.querySelector('#camera');
+    
+    if (!camera) return;
+    
+    // Listener para controles VR
+    this.tick = this.tick.bind(this);
+    this.debugCounter = 0;
+    
+    el.sceneEl.addEventListener('enter-vr', () => {
+      console.log('🥽 Entrando em VR - Ativando controles Quest 3');
+      this.vrMode = true;
+      this.debugVRSetup();
+    });
+    
+    el.sceneEl.addEventListener('exit-vr', () => {
+      console.log('🖥️ Saindo de VR - Desativando controles Quest 3');
+      this.vrMode = false;
+    });
+  },
+   
+   debugVRSetup: function () {
+     console.log('🔧 Debug VR Setup:');
+     console.log('- Left Controller:', document.querySelector('#leftController'));
+     console.log('- Right Controller:', document.querySelector('#rightController'));
+     
+     setTimeout(() => {
+       const leftController = document.querySelector('#leftController');
+       const rightController = document.querySelector('#rightController');
+       
+       if (leftController && rightController) {
+         console.log('✅ Controles encontrados');
+         console.log('- Left Gamepad:', leftController.components['oculus-touch-controls']);
+         console.log('- Right Gamepad:', rightController.components['oculus-touch-controls']);
+       } else {
+         console.log('❌ Controles não encontrados');
+       }
+     }, 1000);
+   },
+   
+   tick: function (time, timeDelta) {
+    if (!this.vrMode) return;
+    
+    const el = this.el;
+    const data = this.data;
+    const camera = el.querySelector('#camera');
+    
+    if (!camera) return;
+    
+    // Obter controles VR
+    const leftController = document.querySelector('#leftController');
+    const rightController = document.querySelector('#rightController');
+    
+    if (!leftController || !rightController) return;
+    
+    // Verificar se os controles estão conectados
+    const leftGamepad = leftController.components['oculus-touch-controls'];
+    const rightGamepad = rightController.components['oculus-touch-controls'];
+    
+    if (!leftGamepad || !rightGamepad) return;
+    
+    // Obter dados do joystick esquerdo (movimentação)
+    const leftThumbstick = this.getThumbstickValue(leftGamepad, 'left');
+    // Obter dados do joystick direito (rotação)
+    const rightThumbstick = this.getThumbstickValue(rightGamepad, 'right');
+    
+    if (leftThumbstick) {
+      this.handleMovement(leftThumbstick, camera, timeDelta);
+    }
+    
+    if (rightThumbstick) {
+      this.handleRotation(rightThumbstick, camera, timeDelta);
+    }
+  },
+  
+  getThumbstickValue: function (controllerComponent, hand) {
+    if (!controllerComponent || !controllerComponent.gamepad) return null;
+    
+    const gamepad = controllerComponent.gamepad;
+    
+    // Índices dos eixos do thumbstick para Quest 3
+    const xAxisIndex = hand === 'left' ? 2 : 0;
+    const yAxisIndex = hand === 'left' ? 3 : 1;
+    
+    if (gamepad.axes && gamepad.axes.length > Math.max(xAxisIndex, yAxisIndex)) {
+      const x = gamepad.axes[xAxisIndex];
+      const y = gamepad.axes[yAxisIndex];
+      
+      // Aplicar deadzone
+      const deadzone = 0.1;
+      const magnitude = Math.sqrt(x * x + y * y);
+      
+      if (magnitude > deadzone) {
+        return { x: x, y: y, magnitude: magnitude };
+      }
+    }
+    
+    return null;
+  },
+  
+  handleMovement: function (thumbstick, camera, timeDelta) {
+    const data = this.data;
+    const speed = data.speed * (timeDelta / 1000);
+    
+    // Obter direção da câmera
+    const cameraRotation = camera.getAttribute('rotation');
+    const yRotation = THREE.MathUtils.degToRad(cameraRotation.y);
+    
+    // Calcular direção de movimento baseada na rotação da câmera
+    const forward = new THREE.Vector3(
+      Math.sin(yRotation),
+      0,
+      Math.cos(yRotation)
+    );
+    
+    const right = new THREE.Vector3(
+      Math.cos(yRotation),
+      0,
+      -Math.sin(yRotation)
+    );
+    
+    // Aplicar movimento
+    this.velocity.set(0, 0, 0);
+    this.velocity.addScaledVector(right, thumbstick.x * speed);
+    this.velocity.addScaledVector(forward, -thumbstick.y * speed);
+    
+    // Aplicar movimento ao rig
+    const currentPosition = this.el.getAttribute('position');
+    const newPosition = {
+      x: currentPosition.x + this.velocity.x,
+      y: currentPosition.y + (data.fly ? this.velocity.y : 0),
+      z: currentPosition.z + this.velocity.z
+    };
+    
+    this.el.setAttribute('position', newPosition);
+    
+    // Log para debug (apenas a cada 60 frames para não spam)
+     this.debugCounter++;
+     if (this.debugCounter % 60 === 0) {
+       console.log('🎮 Quest 3 Movement:', {
+         thumbstick: { x: thumbstick.x.toFixed(2), y: thumbstick.y.toFixed(2) },
+         velocity: { x: this.velocity.x.toFixed(2), z: this.velocity.z.toFixed(2) },
+         position: { x: newPosition.x.toFixed(2), z: newPosition.z.toFixed(2) }
+       });
+     }
+  },
+  
+  handleRotation: function (thumbstick, camera, timeDelta) {
+    const data = this.data;
+    const rotationSpeed = data.rotationSpeed * (timeDelta / 1000) * 30; // 30 graus por segundo
+    
+    // Rotação snap (comum em VR)
+    if (Math.abs(thumbstick.x) > 0.7) {
+      const currentRotation = this.el.getAttribute('rotation');
+      const snapAngle = thumbstick.x > 0 ? 30 : -30;
+      
+      this.el.setAttribute('rotation', {
+        x: currentRotation.x,
+        y: currentRotation.y + snapAngle,
+        z: currentRotation.z
+      });
+      
+      // Prevenir rotação contínua
+      setTimeout(() => {
+        this.rotationCooldown = false;
+      }, 300);
+      
+      if (!this.rotationCooldown) {
+         this.rotationCooldown = true;
+         console.log('🔄 Quest 3 Snap Rotation:', snapAngle + '°');
+       }
+    }
   }
 });
 
