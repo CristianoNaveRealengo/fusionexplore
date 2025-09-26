@@ -1,274 +1,143 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Merge Explore - Experiência A-Frame</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/iwer@<version>/build/iwer.min.js"></script>
-</head>
-<body class="bg-gray-900 text-white overflow-hidden">
-    <!-- Main Container -->
-    <div class="relative h-screen w-full flex flex-col">
-        <!-- Header -->
-        <header class="bg-black bg-opacity-80 backdrop-blur-sm p-4 flex justify-between items-center z-50 border-b border-gray-800">
-            <div class="flex items-center space-x-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 002 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-                </svg>
-                <h1 class="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">Merge Explore</h1>
-            </div>
-            <div class="flex space-x-4">
-                <button id="vr-toggle" class="vr-button bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-full flex items-center space-x-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 002 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Merge Explore - Experiência A-Frame</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://unpkg.com/iwer@2.1.1/build/iwer.min.js"></script>
+    </head>
+
+    <body class="bg-gray-900 text-white overflow-hidden">
+        <!-- Main Container -->
+        <div class="relative h-screen w-full flex flex-col">
+            <!-- Header -->
+            <header
+                class="bg-black bg-opacity-80 backdrop-blur-sm p-4 flex justify-between items-center z-50 border-b border-gray-800">
+                <div class="flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-500" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 002 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
                     </svg>
-                    <span>Entrar em VR</span>
-                </button>
-                <button id="help-btn" class="vr-button bg-gray-800 text-white px-4 py-2 rounded-full flex items-center space-x-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>Ajuda</span>
-                </button>
-            </div>
-        </header>
-        
-        <!-- Main Content -->
-        <div class="flex flex-1 overflow-hidden">
-            <!-- Side Panel -->
-            <div id="side-panel" class="panel-transition w-80 bg-black bg-opacity-70 backdrop-blur-sm border-r border-gray-800 flex flex-col overflow-hidden">
-                <div class="p-4 border-b border-gray-800">
-                    <h2 class="text-lg font-semibold">Biblioteca de Cenas</h2>
-                    <div class="mt-2 relative">
-                        <input type="text" placeholder="Pesquisar cenas..." class="w-full bg-gray-900 bg-opacity-50 border border-gray-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute right-3 top-2.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </div>
+                    <h1
+                        class="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+                        Fusion Reality</h1>
                 </div>
-                
-                <div class="flex-1 overflow-y-auto custom-scroll p-4 space-y-4">
-                    <div class="scene-card bg-gray-900 bg-opacity-50 rounded-lg overflow-hidden border border-gray-800 cursor-pointer hover:border-purple-500 transition-all">
-                        <div class="h-32 bg-gradient-to-r from-purple-900 to-blue-900 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <div class="p-3">
-                            <h3 class="font-medium">Exploração Espacial</h3>
-                            <p class="text-xs text-gray-400 mt-1">Explore o cosmos com esta cena interestelar</p>
-                        </div>
-                    </div>
-                    
-                    <div class="scene-card bg-gray-900 bg-opacity-50 rounded-lg overflow-hidden border border-gray-800 cursor-pointer hover:border-purple-500 transition-all">
-                        <div class="h-32 bg-gradient-to-r from-green-900 to-teal-900 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                            </svg>
-                        </div>
-                        <div class="p-3">
-                            <h3 class="font-medium">Ruínas Antigas</h3>
-                            <p class="text-xs text-gray-400 mt-1">Descubra tesouros escondidos em ruínas antigas</p>
-                        </div>
-                    </div>
-                    
-                    <div class="scene-card bg-gray-900 bg-opacity-50 rounded-lg overflow-hidden border border-gray-800 cursor-pointer hover:border-purple-500 transition-all">
-                        <div class="h-32 bg-gradient-to-r from-yellow-900 to-orange-900 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                            </svg>
-                        </div>
-                        <div class="p-3">
-                            <h3 class="font-medium">Floresta Mágica</h3>
-                            <p class="text-xs text-gray-400 mt-1">Uma floresta mística cheia de maravilhas</p>
-                        </div>
-                    </div>
-                    
-                    <div class="scene-card bg-gray-900 bg-opacity-50 rounded-lg overflow-hidden border border-gray-800 cursor-pointer hover:border-purple-500 transition-all">
-                        <div class="h-32 bg-gradient-to-r from-red-900 to-pink-900 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                            </svg>
-                        </div>
-                        <div class="p-3">
-                            <h3 class="font-medium">Laboratório de Ficção Científica</h3>
-                            <p class="text-xs text-gray-400 mt-1">Laboratório de alta tecnologia com equipamentos futuristas</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="p-4 border-t border-gray-800">
-                    <button class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-md flex items-center justify-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                <div class="flex space-x-4">
+                    <button id="vr-toggle"
+                        class="vr-button bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-full flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 002 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
                         </svg>
-                        <span>Criar Nova Cena</span>
+                        <span>Entrar em VR</span>
                     </button>
+
                 </div>
-            </div>
-            
-            <!-- A-Frame Scene -->
-            <div class="flex-1 relative">
-                <a-scene 
-                    id="aframe-scene" 
-                    vr-mode-ui="enabled: true" 
-                    embedded
-                    webxr-setup
-                    background="color: #ECECEC">
-                    
-                    <!-- Assets -->
-                    <a-assets>
-                        <a-asset-item id="logo-obj" src="/logo.obj"></a-asset-item>
-                        <a-asset-item id="logo-mtl" src="/obj.mtl"></a-asset-item>
-                    </a-assets>
-                    
-                    <!-- Environment -->
-                    <a-entity environment="preset: forest; dressingAmount: 500"></a-entity>
-                    
-                    <!-- Player Rig com controles otimizados para Meta Quest 3 -->
-                    <a-entity 
-                        id="rig" 
-                        quest-controls="speed: 0.5; fly: false; rotationSpeed: 1.5"
-                        position="0 1.6 0">
-                        
-                        <!-- Camera principal -->
-                        <a-entity 
-                            id="camera" 
-                            camera 
-                            look-controls="pointerLockEnabled: true"
-                            wasd-controls="acceleration: 20"
-                            position="0 0 0">
-                            
-                            <!-- Cursor para interação -->
-                            <a-entity 
-                                cursor="fuse: true; fuseTimeout: 1500"
-                                position="0 0 -1"
-                                geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
-                                material="color: #4FC3F7; shader: flat">
+            </header>
+
+            <!-- Main Content -->
+            <div class="flex flex-1 overflow-hidden">
+                <!-- Side Panel -->
+
+
+                <!-- A-Frame Scene -->
+                <div class="flex-1 relative">
+                    <a-scene id="aframe-scene" vr-mode-ui="enabled: true" embedded webxr-setup
+                        background="color: #ECECEC" physics="debug: false; gravity: -2">
+
+                        <!-- Assets -->
+                        <a-assets>
+                            <a-asset-item id="buster_drone" src="/buster_drone.glb"></a-asset-item>
+                            <a-asset-item id="mech_drone" src="/mech_drone.glb"></a-asset-item>
+                            <a-asset-item id="hover_bike" src="/hover_bike_05.glb"></a-asset-item>
+                        </a-assets>
+
+
+                        <!-- Environment -->
+                        <a-entity environment="preset: forest; dressingAmount: 500; grid: 1x1"></a-entity>
+
+                        <!-- Chão invisível para colisão no VR -->
+                        <a-plane position="0 0 0" rotation="-90 0 0" width="100" height="100"
+                            material="transparent: true; opacity: 0" static-body="shape: box; size: 100 0.1 100">
+                        </a-plane>
+
+                        <!-- Player Rig com controles otimizados para Meta Quest 3 -->
+                        <a-entity id="rig" quest-controls="speed: 0.5; fly: false; rotationSpeed: 1.5"
+                            position="0 0.65 0" kinematic-body="shape: box; size: 1 1.8 1">
+
+                            <!-- Camera principal -->
+                            <a-entity id="camera" camera="" look-controls="pointerLockEnabled: true"
+                                wasd-controls="acceleration: 20" position="0 0 0" rotation="0 0 0">
+
+                                <!-- Cursor para interação -->
+                                <a-entity cursor="fuse: true; fuseTimeout: 1500" position="0 0 -1"
+                                    geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+                                    material="color: #4FC3F7; shader: flat">
+                                </a-entity>
+                            </a-entity>
+
+                            <!-- Controles de mão esquerda para Quest 3 -->
+                            <a-entity id="leftController" oculus-touch-controls="hand: left"
+                                hand-tracking-controls="hand: left"
+                                quest-teleport="cameraRig: #rig; teleportOrigin: #camera; button: trigger"
+                                visible="true">
+                            </a-entity>
+
+                            <!-- Controles de mão direita para Quest 3 -->
+                            <a-entity id="rightController" oculus-touch-controls="hand: right"
+                                hand-tracking-controls="hand: right"
+                                quest-teleport="cameraRig: #rig; teleportOrigin: #camera; button: trigger"
+                                visible="true">
                             </a-entity>
                         </a-entity>
-                        
-                        <!-- Controles de mão esquerda para Quest 3 -->
-                        <a-entity 
-                            id="leftController"
-                            oculus-touch-controls="hand: left"
-                            hand-tracking-controls="hand: left"
-                            quest-teleport="cameraRig: #rig; teleportOrigin: #camera; button: trigger"
-                            visible="true">
+
+
+                        <!-- Hover Bike - Modelo GLTF -->
+                        <a-entity gltf-model="/hover_bike_05.glb" position="-8.76639 0.49752 -10.42556"
+                            scale="1.5 1.5 1.5"
+                            animation__float="property: position; to: -8.76639 0.8 -10.42556; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine"                            
+                            static-body="shape: box; size: 3 1.5 3">
                         </a-entity>
+
+                        <!-- Sombra da Hover Bike - Efeito de Flutuação -->
+                        <a-entity id="bike-shadow-group" position="-8.76639 0 -10.42556">
+                            <!-- Sombra principal (circular) -->
+                            <a-circle position="0 0.01 0" radius="2" rotation="-90 0 0"
+                                material="color: #000000; opacity: 0.3; transparent: true; shader: flat"
+                                animation="property: scale; to: 1.1 1.1 1.1; dir: alternate; dur: 2000; loop: true; easing: easeInOutSine">
+                            </a-circle>
                         
-                        <!-- Controles de mão direita para Quest 3 -->
-                        <a-entity 
-                            id="rightController"
-                            oculus-touch-controls="hand: right"
-                            hand-tracking-controls="hand: right"
-                            quest-teleport="cameraRig: #rig; teleportOrigin: #camera; button: trigger"
-                            visible="true">
+                            <!-- Sombra secundária (mais difusa) -->
+                            <a-circle position="0 0.005 0" radius="3" rotation="-90 0 0"
+                                material="color: #000000; opacity: 0.1; transparent: true; shader: flat"
+                                animation="property: scale; to: 1.05 1.05 1.05; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine">
+                            </a-circle>
                         </a-entity>
-                    </a-entity>
-                    
-                    <!-- Objeto 3D -->
-                    <a-entity 
-                        obj-model="obj: #logo-obj; mtl: #logo-mtl"
-                        position="0 6 -11" 
-                        scale="0.3 0.3 0.3"
-                        animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
-                    </a-entity>
-                    
-                    <!-- Iluminação otimizada -->
-                    <a-light type="ambient" color="#404040" intensity="0.4"></a-light>
-                    <a-light type="directional" position="1 1 1" color="#ffffff" intensity="0.6"></a-light>
-                </a-scene>
-                
-                <!-- Scene Controls -->
-                <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-70 backdrop-blur-sm rounded-full p-2 flex space-x-2">
-                    <button id="move-btn" class="bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-full">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7l4-4m0 0l4 4m-4-4v18m0 0l-4-4m4 4l4-4" />
-                        </svg>
-                    </button>
-                    <button id="rotate-btn" class="bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-full">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                    </button>
-                    <button id="scale-btn" class="bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-full">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 0h-4m4 0l-5-5" />
-                        </svg>
-                    </button>
-                    <button id="merge-btn" class="bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-full">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                    </button>
-                </div>
-                
-                <!-- Toggle Panel Button -->
-                <button id="toggle-panel" class="absolute top-4 left-4 bg-black bg-opacity-70 backdrop-blur-sm text-white p-3 rounded-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Help Modal -->
-    <div id="help-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
-        <div class="bg-gray-900 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto custom-scroll">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold">Ajuda do Merge Explore</h2>
-                    <button id="close-help" class="text-gray-400 hover:text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-                
-                <div class="space-y-4">
-                    <div>
-                        <h3 class="text-lg font-semibold text-purple-400">Navegação no Meta Quest 3</h3>
-                        <p class="text-gray-300 mt-1">Use os controles do Quest 3 para se mover. Aponte com o controle e pressione o gatilho para teletransporte. Use o joystick para movimento suave.</p>
-                    </div>
-                    
-                    <div>
-                        <h3 class="text-lg font-semibold text-purple-400">Hand Tracking</h3>
-                        <p class="text-gray-300 mt-1">O Quest 3 suporta rastreamento de mãos. Remova os controles e use suas mãos para interagir diretamente com os objetos.</p>
-                    </div>
-                    
-                    <div>
-                        <h3 class="text-lg font-semibold text-purple-400">Manipulação de Objetos</h3>
-                        <ul class="list-disc pl-5 text-gray-300 mt-1 space-y-1">
-                            <li><span class="font-medium">Mover:</span> Selecione um objeto e use a ferramenta de mover para reposicioná-lo</li>
-                            <li><span class="font-medium">Rotacionar:</span> Use a ferramenta de rotação para mudar a orientação do objeto</li>
-                            <li><span class="font-medium">Escalar:</span> Ajuste o tamanho dos objetos com a ferramenta de escala</li>
-                            <li><span class="font-medium">Mesclar:</span> Combine os objetos selecionados em uma única entidade</li>
-                        </ul>
-                    </div>
-                    
-                    <div>
-                        <h3 class="text-lg font-semibold text-purple-400">Modo VR</h3>
-                        <p class="text-gray-300 mt-1">Clique no botão "Entrar em VR" para experimentar a cena em realidade virtual. Otimizado especificamente para Meta Quest 3.</p>
-                    </div>
-                    
-                    <div>
-                        <h3 class="text-lg font-semibold text-purple-400">Biblioteca de Cenas</h3>
-                        <p class="text-gray-300 mt-1">Navegue e selecione da nossa coleção de cenas pré-prontas. Clique em qualquer cena para carregá-la no editor.</p>
-                    </div>
-                </div>
-                
-                <div class="mt-6 pt-4 border-t border-gray-800">
-                    <button id="close-help-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-md">
-                        Entendi!
-                    </button>
+
+                        <!-- Buster Drone - Com animação própria do modelo -->
+                        <a-entity gltf-model="#buster_drone" position="-2 3 -10.6" scale="1.2 1.2 1.2" rotation="0 45 0"
+                            animation-mixer="clip: *; loop: repeat" static-body="shape: box; size: 2 2 2">
+                        </a-entity>
+
+                        <!-- Mech Drone - Estático na cena -->
+                        <a-entity gltf-model="#mech_drone" position="2 0.1 -7" scale="3 3 3" rotation="0 180 0"
+                            static-body="shape: box; size: 4 3 4">
+                        </a-entity>                        
+
+                        <!-- Iluminação otimizada -->
+                        <a-light type="ambient" color="#404040" intensity="0.4"></a-light>
+                        <a-light type="directional" position="1 1 1" color="#ffffff" intensity="0.6"></a-light>
+                    </a-scene>
+
                 </div>
             </div>
         </div>
-    </div>
-    
-    <script type="module" src="/src/main.js"></script>
-</body>
+
+        <script type="module" src="/src/main.js"></script>
+    </body>
+
 </html>
