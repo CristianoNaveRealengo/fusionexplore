@@ -24,7 +24,7 @@ export default defineConfig({
     // Host para acesso externo (importante para VR)
     host: '0.0.0.0',
     
-    // HTTPS obrigatório para WebXR
+    // HTTPS necessário para WebXR
     https: true,
     
     // Configurações de CORS para assets
